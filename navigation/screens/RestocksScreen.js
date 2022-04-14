@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { ScrollView, Text, View, Image } from 'react-native'
 import { Card, Button } from '@rneui/themed'
 import Animated, { FadeOutUp, FadeInUp, FadeIn, StretchOutY, SequencedTransition } from 'react-native-reanimated'
-import RequestItem from './RestocksScreen/RequestItem'
 const notificationImage = require('../../assets/notification.png')
 const requestDB = require('../../fetchData/requestDB')
 
+
 export default function MainContainer({navigation}) {
     const [ post, setPost ] = useState(null)
-    const [ isSubmitting, setIsSubmitting ] = useState(false)
     const [ loading, setLoading ] = useState(false)
     const [ failed, setFailed ] = useState(false)
 
@@ -77,22 +76,6 @@ export default function MainContainer({navigation}) {
                 <Text style={{ fontSize: 20, color: 'white', alignSelf: 'center', marginTop: 18 }}>Failed, try again in a moment.</Text>
             </Animated.View>}
             <ScrollView style={{ backgroundColor: '#171717' }}>
-                <Button 
-                    buttonStyle={{
-                        position: 'fixed',
-                        top: 0,
-                        alignSelf: 'flex-end',
-                        width: '100%',
-                        height: 40,
-                        padding: 0
-                    }}
-                    titleStyle={{
-                        fontWeight: 'bold',
-                    }}
-                    title={isSubmitting ? 'Back' : 'Request an Item'}
-                    onPress={() => setIsSubmitting(wasSubmitting => !wasSubmitting)}
-                />
-                {isSubmitting ? <RequestItem requestDB={requestDB}/> :
                 <View>
                     {post ? post.map((item, i) => {
                         return(<Animated.View entering={FadeIn} exiting={StretchOutY} layout={SequencedTransition} key={item}>
@@ -199,7 +182,7 @@ export default function MainContainer({navigation}) {
                         </Card>
                         </Animated.View>)
                     }) : null}
-                </View>}
+                </View>
             </ScrollView>
         </>
     )
@@ -263,7 +246,7 @@ export default function MainContainer({navigation}) {
       // Update that item wasnt found
       async function unfoundItem(name, item, index){
         try {
-            setLoading(true);
+        setLoading(1);
           console.log(`Deleting ${name} & ${item} Combo...`);
           await requestDB.getData(
            `UPDATE "MaxChamberlain/Vitality"."needed_items" SET status = 'unfound' WHERE picker_name = '${item}' AND item = '${name}'`
@@ -274,5 +257,5 @@ export default function MainContainer({navigation}) {
             setFailed(true)
             setTimeout(setFailed(false), 1000)
         }
-      }
+    }
 }

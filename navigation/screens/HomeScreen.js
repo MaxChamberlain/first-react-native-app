@@ -3,42 +3,82 @@ import { View, Text } from 'react-native'
 import { getName } from '../../fetchData/getName'
 import { Card, Button } from '@rneui/themed'
 import { TouchableOpacity } from 'react-native-gesture-handler';
-
-export default function MainContainer({navigation}) {
+import Ionicons from 'react-native-vector-icons/Ionicons'
+export default function MainContainer({navigation, setRoute}) {
     const [ name, setName ] = React.useState(null);
     
     React.useEffect(()=> {
         nameSetter()
     }, [])
-
+    
     return (
-        <View style={{ height: '100%', backgroundColor: '#171717' }}>
-            <Text style={{
-                color: 'white',
-                fontSize: 18,
-                fontWeight: 'bold',
-                alignSelf: 'center',
-            }}>Hello, {name}</Text>
+        <View style={{ height: '100%', backgroundColor: '#171717' }}> 
+        <Text style={{
+            marginTop: 20, 
+            color: 'white',
+            fontSize: 25,
+            fontWeight: 'bold',
+            alignSelf: 'center',
+        }}>Hello, {name}</Text>
+        <Text style={{
+            color: 'white',
+            opacity: 0.3,
+            fontSize: 20,
+            fontWeight: 'bold',
+            alignSelf: 'center',
+            marginTop: 20
+        }}>Where would you like to go? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Restocks')}>
-                <Card containerStyle={{ height: 100, borderWidth: 0, borderRadius: 10, position: 'relative', padding: 0, backgroundColor: '#303235'}}>
+                <Card containerStyle={{ height: 100, borderWidth: 0, borderRadius: 10, position: 'relative', padding: 0, backgroundColor: '#ffa600'}}>
                     <Text style={{
+                        alignSelf: 'flex-start',
+                        marginTop: 38,
+                        marginLeft: 20,
                         marginTop: 35,
                         color: 'white',
                         fontSize: 18,
                         fontWeight: 'bold',
-                        alignSelf: 'center',
                     }}>Restock Requests</Text>
+                    <Ionicons name='list-outline' size={40} color='white' style={{
+                        position: 'absolute',
+                        right: 20,
+                        top: 27
+                    }} />
                 </Card>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
-                <Card containerStyle={{ height: 100, borderWidth: 0, borderRadius: 10, position: 'relative', padding: 0, backgroundColor: '#303235'}}>
+            <TouchableOpacity onPress={() => navigation.navigate('Request')}>
+                <Card containerStyle={{ height: 100, borderWidth: 0, borderRadius: 10, position: 'relative', padding: 0, backgroundColor: '#0062ff'}}>
                     <Text style={{
+                        alignSelf: 'flex-start',
+                        marginTop: 38,
+                        marginLeft: 20,
+                        color: 'white',
+                        fontSize: 18,
+                        fontWeight: 'bold',
+                    }}>Request an Item</Text>
+                    <Ionicons name='create-outline' size={40} color='white' style={{
+                        position: 'absolute',
+                        right: 20,
+                        top: 27
+                    }} />
+                </Card>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Customer Service')}>
+                <Card containerStyle={{ height: 100, borderWidth: 0, borderRadius: 10, position: 'relative', padding: 0, backgroundColor: '#7000bf'}}>
+                    <Text style={{
+                        alignSelf: 'flex-start',
+                        marginTop: 38,
+                        marginLeft: 20,
                         marginTop: 35,
                         color: 'white',
                         fontSize: 18,
                         fontWeight: 'bold',
-                        alignSelf: 'center',
-                    }}>Settings</Text>
+                    }}>Customer Service</Text>
+                    <Ionicons name='call-outline' size={40} color='white' style={{
+                        position: 'absolute',
+                        right: 20,
+                        top: 27
+                    }} />
                 </Card>
             </TouchableOpacity>
         </View>

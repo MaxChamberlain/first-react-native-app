@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "temp",
-    "slug": "temp",
+    "name": "Vishi",
+    "slug": "Vishi",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,13 +17,16 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "us.vishi.www",
+      "cocoapods": "1.11.2"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "us.vishi.www"
     },
     "web": {
       "favicon": "./assets/favicon.png"

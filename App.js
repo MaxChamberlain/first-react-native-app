@@ -1,13 +1,50 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import MainContainer from './navigation/MainContainer';
 import { View, Text, TextInput } from 'react-native';
 import { Button } from '@rneui/themed'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import registerNNPushToken, { registerIndieID } from 'native-notify';
 
 export default function App() {
   const [ name, setName ] = useState(null);
   const [ hasName, setHasName ] = useState(false);
+
+  registerNNPushToken(2471, 'h8bDuld55KMwdbyTEKDJds')
+
+  const _notifsRestocks = async () => {
+    try {
+      const value = await AsyncStorage.getItem('@restocks_notifs_key:vishi')
+      if (value === true) {
+        return true
+      } else {
+        return false
+      }
+    } catch (error) {
+      console.log(error)
+      return false
+    }
+  }
+  if(_notifsRestocks()){
+    registerIndieID('restocks', 2471, 'h8bDuld55KMwdbyTEKDJds');
+  }
+
+  const _notifsCs = async () => {
+    try {
+      const value = await AsyncStorage.getItem('@cuserv_notifs_key:vishi')
+      if (value === true) {
+        return true
+      } else {
+        return false
+      }
+    } catch (error) {
+      console.log(error)
+      return false
+    }
+  }
+  if(_notifsCs()){
+    registerIndieID('customerservice', 2471, 'h8bDuld55KMwdbyTEKDJds');
+  }
 
   const _storeName = async name => {
     console.log('Storing name:', name);

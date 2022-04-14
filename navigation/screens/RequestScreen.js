@@ -1,17 +1,71 @@
 import { TextInput, Text, View, Switch, Dimensions } from 'react-native'
 import { useState } from 'react'
 import { Button } from '@rneui/themed/dist/Button';
-import { getName } from '../../../fetchData/getName';
+import { getName } from '../../fetchData/getName';
+import Animated, { FadeOutUp, FadeInUp } from 'react-native-reanimated'
+const requestDB = require('../../fetchData/requestDB')
+import expoPushTokens from '../../expoPushTokens.js';
 
-export default function RequestItem({requestDB}){
+export default function RequestScreen(){
   const [ sku, setSku ] = useState(null);
   const [ bin, setBin ] = useState(null);
   const [ isNeeded, setIsNeeded ] = useState(false);
   const [ amount, setAmount ] = useState(1);
+  const [ loading, setLoading ] = useState(0);
 
     return(
         <>
-        <View style={{ height: '100%', width: '100%' }}>
+        {loading === 1 && 
+            <Animated.View style={{
+                backgroundColor: '#36393f',
+                height: 60,
+                width: '90%',
+                position: 'absolute',
+                top: 10,
+                left: '5%',
+                borderRadius: 10,
+                zIndex: 999
+            }}
+            entering={FadeInUp}
+            exiting={FadeOutUp}
+            >
+                <Text style={{ fontSize: 20, color: 'white', alignSelf: 'center', marginTop: 18 }}>Working...</Text>
+            </Animated.View>}
+            {loading === 2 && 
+            <Animated.View style={{
+                backgroundColor: 'red',
+                height: 60,
+                width: '90%',
+                position: 'absolute',
+                top: 10,
+                left: '5%',
+                borderRadius: 10,
+                zIndex: 999
+            }}
+            entering={FadeInUp}
+            exiting={FadeOutUp}
+            >
+                <Text style={{ fontSize: 20, color: 'white', alignSelf: 'center', marginTop: 18 }}>Failed, try again in a moment.</Text>
+            </Animated.View>}
+            {loading === 3 && 
+            <Animated.View style={{
+                backgroundColor: 'rgb(72, 117, 55)',
+                height: 60,
+                width: '90%',
+                position: 'absolute',
+                top: 10,
+                left: '5%',
+                borderRadius: 10,
+                zIndex: 999
+            }}
+            entering={FadeInUp}
+            exiting={FadeOutUp}
+            >
+                <Text style={{ fontSize: 20, color: 'white', alignSelf: 'center', marginTop: 18 }}>Success!</Text>
+            </Animated.View>}
+
+
+        <View style={{ backgroundColor: '#171717', height: '100%', width: '100%' }}>
             <Text style={{
                 color: '#b0b0b0',
                 fontSize: 20,
@@ -98,14 +152,15 @@ export default function RequestItem({requestDB}){
             position: 'absolute',
             width: '100%',
             height: '100%',
-            top: Dimensions.get('window').height * 0.69,
+            top: Dimensions.get('window').height * 0.65,
         }}>
             <Button 
             buttonStyle={{
                 width: '100%',
-                height: 40,
-                padding: 0,
-                baackgroundColor: sku && bin ? '#429aff' : 'gray',
+                height: 80,
+                paddingTop: 18,
+                backgroundColor: sku && bin ? '#429aff' : 'gray',
+                alignItems: 'flex-start',
             }}
             titleStyle={{
                 fontWeight: 'bold',
@@ -118,14 +173,24 @@ export default function RequestItem({requestDB}){
     )
 
     async function sendRequest(sku, qty, needed, bin) {
-          setSku(null)
-          setIsNeeded(false)
-          setAmount(1)
-          setBin(null)
-          const name = await getName()
-          let date = new Date()
-          let timestamp = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-          requestDB.getData(`INSERT INTO "MaxChamberlain/Vitality"."needed_items" (picker_name, item, timestamp, status, qty, priority, bin) VALUES ('${sku.toUpperCase()}','${name}','${timestamp}','unseen', '${qty}', '${needed ? 'Yes' : 'No'}', '${bin.toUpperCase()}')`)
+        try{
+            setSku(null)
+            setIsNeeded(false)
+            setAmount(1)
+            setBin(null)
+            setLoading(1)
+            const name = await getName()
+            expoPushTokens('Vishi', `${name} is requesting ${ needed ? qty + 'x ' : '' }${sku} (${needed ? 'Needed' : 'Not Needed'})`, 'restocks')
+            let date = new Date()
+            let timestamp = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+            await requestDB.getData(`INSERT INTO "MaxChamberlain/Vitality"."needed_items" (picker_name, item, timestamp, status, qty, priority, bin) VALUES ('${sku.toUpperCase()}','${name}','${timestamp}','unseen', '${qty}', '${needed ? 'Yes' : 'No'}', '${bin.toUpperCase()}')`)
+            setLoading(3)
+            setTimeout(() => setLoading(0), 1000)
+        }catch(e){
+            setLoading(2)
+            setTimeout(() => setLoading(0), 3000)
+            console.log(e)
+        }
         
       }
 }
