@@ -1,14 +1,9 @@
 const axios = require('axios');
-const proxy = process.env.REACT_APP_PROXY_URL
-const endpoint = {
-    request: process.env.REACT_APP_SH_REQUEST_URL, 
-    refresh: process.env.REACT_APP_SH_REFRESH_URL
-    }
 
 export async function get (gQuery){
         const token = await refreshToken()
         const res = await axios({
-            url: proxy + endpoint.request,
+            url: 'https://stark-oasis-84035.herokuapp.com/' + 'https://public-api.shiphero.com/graphql',
             method: 'post',
             headers: {
             authorization: `Bearer ${token}`,
@@ -18,14 +13,13 @@ export async function get (gQuery){
             data: {query: gQuery}
         });
         const data = await res;
-        console.log('Complexity:: ' + data.data.data.product.complexity)
         return(JSON.stringify(data, undefined, 2))
 }
 
 export async function getOrder (gQuery){
     const token = await refreshToken()
     const res = await axios({
-        url: proxy + endpoint.request,
+        url: 'https://stark-oasis-84035.herokuapp.com/' + 'https://public-api.shiphero.com/graphql',
         method: 'post',
         headers: {
         authorization: `Bearer ${token}`,
@@ -40,13 +34,13 @@ export async function getOrder (gQuery){
 
 async function refreshToken(){
     const token = await axios({
-        url: proxy + endpoint.refresh,
+        url: 'https://public-api.shiphero.com/auth/refresh',
         method: 'post',
         headers: {
             "Content-Type": "application/json"
         },
         data: {
-            "refresh_token": process.env.REACT_APP_SH_REFRESH_TOKEN
+            "refresh_token": 'IH-o3MWEsI_Aoc5xI7BztYtkVegitjB6mznms6itJqL7g'
         }
     })
     return token.data.access_token

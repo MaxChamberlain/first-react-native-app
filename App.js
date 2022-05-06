@@ -5,6 +5,7 @@ import { View, Text, TextInput } from 'react-native';
 import { Button } from '@rneui/themed'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import registerNNPushToken, { registerIndieID } from 'native-notify';
+const getName = require('./fetchData/getName');
 
 export default function App() {
   const [ name, setName ] = useState(null);
@@ -46,6 +47,23 @@ export default function App() {
     registerIndieID('customerservice', 2471, 'h8bDuld55KMwdbyTEKDJds');
   }
 
+  const _notifsStocked = async () => {
+    try {
+      const value = await AsyncStorage.getItem('@stocked_notifs_key:vishi')
+      if (value === true) {
+        return true
+      } else {
+        return false
+      }
+    } catch (error) {
+      console.log(error)
+      return false
+    }
+  }
+  if(_notifsStocked()){
+    registerIndieID('stocked', 2471, 'h8bDuld55KMwdbyTEKDJds');
+  }
+
   const _storeName = async name => {
     console.log('Storing name:', name);
     try {
@@ -74,6 +92,7 @@ export default function App() {
 
   const init = async () => {
     setHasName(await _getName())
+    hasName && registerIndieID(await getName.getName(), 2471, 'h8bDuld55KMwdbyTEKDJds')
   }
   init()
 

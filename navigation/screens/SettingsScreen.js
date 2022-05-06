@@ -9,11 +9,13 @@ export default function MainContainer({setVisible}) {
     const [ currName, setCurrName ] = useState(null);
     const [ getNotifs, setGetNotifs ] = useState(false);
     const [ getCsNotifs, setGetCsNotifs ] = useState(false);
+    const [ getStockedNotifs, setGetStockedNotifs ] = useState(false);
     const [ loading, setLoading ] = useState(0);
 
     useEffect(() => {
         getNotifPerms()
         getCsPerms()
+        getStockedPerms()
     }, [])
 
     return (
@@ -139,6 +141,28 @@ export default function MainContainer({setVisible}) {
                                 marginBottom: 10,
                                 alignSelf: 'flex-start'
                             }}>
+                                Stocked Item
+                            </Text>
+                            <Switch
+                            trackColor={{ false: "#767577", true: "#429aff" }}
+                            thumbColor='white'
+                            ios_backgroundColor="#3e3e3e"
+                            style={{alignSelf: 'flex-end', marginTop: 10}}
+                            onValueChange={() => setGetStockedNotifs(gotStockedNotifs => !gotStockedNotifs)}
+                            value={getStockedNotifs}
+                        />
+                        </View>
+
+                        <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingLeft: 20, paddingRight: 20 }}>
+                            <Text style={{
+                                color: 'white',
+                                fontSize: 20,
+                                fontWeight: 'bold',
+                                alignSelf: 'center',
+                                marginTop: 30,
+                                marginBottom: 10,
+                                alignSelf: 'flex-start'
+                            }}>
                                 Customer Service
                             </Text>
                             <Switch
@@ -163,7 +187,7 @@ export default function MainContainer({setVisible}) {
                             width: '50%',
                             height: 80,
                             padding: 0,
-                            baackgroundColor: '#429aff',
+                            backgroundColor: '#429aff',
                             borderRadius: 0,
                         }}
                         titleStyle={{
@@ -213,7 +237,7 @@ export default function MainContainer({setVisible}) {
             currName && await setName(currName.replace(/[^a-zA-Z ]/g, "").toUpperCase()); setCurrName(null)
             await setNotifs()
             setLoading(3)
-            setTimeout(() => setLoading(0), 2000)
+            setTimeout(() => {setLoading(0); setVisible(false)}, 2000)
         }catch (e) {
             console.log(e)
             setLoading(2)
@@ -223,13 +247,17 @@ export default function MainContainer({setVisible}) {
     async function setNotifs(){
         try {
             await AsyncStorage.setItem(
-            '@restocks_notifs_key:vishi',
-            JSON.stringify(getNotifs)
+                '@restocks_notifs_key:vishi',
+                JSON.stringify(getNotifs)
             );
             await AsyncStorage.setItem(
                 '@cuserv_notifs_key:vishi',
                 JSON.stringify(getCsNotifs)
-                );
+            );
+            await AsyncStorage.setItem(
+                '@stocked_notifs_key:vishi',
+                JSON.stringify(getStockedNotifs)
+            );  
             return null
         } catch (error) {
             console.log(error);
@@ -242,6 +270,16 @@ export default function MainContainer({setVisible}) {
         setGetNotifs(true)
       } else {
         setGetNotifs(false)
+      }
+      return null
+    }
+
+    async function getStockedPerms(){
+      const value = await AsyncStorage.getItem('@stocked_notifs_key:vishi')
+      if (value === 'true') {
+        setGetStockedNotifs(true)
+      } else {
+        setGetStockedNotifs(false)
       }
       return null
     }

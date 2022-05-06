@@ -5,7 +5,7 @@ import { Card, Button } from '@rneui/themed'
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 
-export default function MainContainer({navigation, setCurrRoute}) {
+export default function AdjustInventory({navigation, setCurrRoute}) {
     const [ name, setName ] = React.useState(null);
     
     React.useEffect(()=> {

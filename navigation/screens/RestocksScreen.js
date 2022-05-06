@@ -4,7 +4,7 @@ import { Card, Button } from '@rneui/themed'
 import Animated, { FadeOutUp, FadeInUp, FadeIn, StretchOutY, SequencedTransition } from 'react-native-reanimated'
 const notificationImage = require('../../assets/notification.png')
 const requestDB = require('../../fetchData/requestDB')
-
+import expoPushTokens from '../../expoPushTokens.js';
 
 export default function MainContainer({navigation}) {
     const [ post, setPost ] = useState(null)
@@ -78,12 +78,12 @@ export default function MainContainer({navigation}) {
             <ScrollView style={{ backgroundColor: '#171717' }}>
                 <View>
                     {post ? post.map((item, i) => {
-                        return(<Animated.View entering={FadeIn} exiting={StretchOutY} layout={SequencedTransition} key={item}>
+                        return(<Animated.View entering={FadeIn} exiting={StretchOutY} layout={SequencedTransition} key={item._id}>
                         <Card 
-                            containerStyle={{ borderWidth: 0, position: 'relative', padding: 0, backgroundColor: item[3] === 'unseen' ? '#303235' : '#A0A18C',
+                            containerStyle={{ borderWidth: 0, position: 'relative', padding: 0, backgroundColor: item.status === 'unseen' ? '#303235' : '#A0A18C',
                         }}
                         >
-                            {item[5] == 'Yes' && <Image source={notificationImage} style={{
+                            {item.priority === 'Yes' && <Image source={notificationImage} style={{
                                 position: 'absolute', 
                                 right: 80,
                                 top: 10,
@@ -91,9 +91,9 @@ export default function MainContainer({navigation}) {
                                 height: 12,
                             }} />}
                             <View style={{padding: 20}}>
-                                <Card.Title style={styles.cardbody.head}>{item[1]}</Card.Title>
-                                <Card.Title style={styles.cardbody.subhead}>{item[0]}</Card.Title>
-                                <Card.Title style={styles.cardbody.subhead}>Bin: {item[6]}</Card.Title>
+                                <Card.Title style={styles.cardbody.head}>{item.item}</Card.Title>
+                                <Card.Title style={styles.cardbody.subhead}>{item.picker_name}</Card.Title>
+                                <Card.Title style={styles.cardbody.subhead}>Bin: {item.bin}</Card.Title>
                                 <Text style={{
                                     color: 'white',
                                     position: 'absolute', 
@@ -101,7 +101,7 @@ export default function MainContainer({navigation}) {
                                     top: 8,
                                     fontSize: 20,
                                     fontWeight: 'bold'
-                                }}>{item[4]}</Text>
+                                }}>{item.qty}</Text>
                                 <Text style={{
                                     color: 'white',
                                     position: 'absolute', 
@@ -110,10 +110,10 @@ export default function MainContainer({navigation}) {
                                     fontSize: 18,
                                     fontWeight: 'bold',
                                 }}>
-                                    {item[5] === 'Yes' ? 'Needed' : 'Not Needed'}
+                                    {item.priority === 'Yes' ? 'Needed' : 'Not Needed'}
                                 </Text>
                             </View>
-                            {item[3] === 'unseen' ?
+                            {item.status === 'unseen' ?
                             <Button
                                 buttonStyle={{
                                 borderRadius: 0,
@@ -126,7 +126,7 @@ export default function MainContainer({navigation}) {
                                     fontWeight: 'bold',
                                 }}
                                 title="MARK AS SEEN"
-                                onPress={() => updateItem(item[1], item[0])}
+                                onPress={() => updateItem(item._id, item.item, item.picker_name)}
                             />
                             :
                             <View style={{ borderWidth: 0, flex: 1, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' }}>
@@ -150,7 +150,7 @@ export default function MainContainer({navigation}) {
                                             fontWeight: 'bold',
                                         }}
                                         title="I FOUND IT"
-                                        onPress={() => removeItem(item[1], item[0])}
+                                        onPress={() => removeItem(item._id, item.item, item.picker_name)}
                                     />
                                 </View>
                                 <View style={{
@@ -174,7 +174,7 @@ export default function MainContainer({navigation}) {
                                             fontWeight: 'bold',
                                         }}
                                         title="I DIDN'T FIND IT"
-                                        onPress={() => unfoundItem(item[1], item[0])}
+                                        onPress={() => unfoundItem(item._id, item.item, item.picker_name)}
                                     />
                                 </View>
                             </View>
@@ -189,34 +189,23 @@ export default function MainContainer({navigation}) {
 
     async function getPost() {
         try {
-            const data = await requestDB.getData('SELECT * FROM "MaxChamberlain/Vitality"."needed_items" ORDER BY status, timestamp DESC');
-            return(JSON.parse(data).data.data.filter(item => item[3] !== 'unfound'))
+            // const data = await requestDB.getData('SELECT * FROM "MaxChamberlain/Vitality"."needed_items" ORDER BY status, timestamp DESC');
+            const data = await requestDB.getData('find', 'needed_items', {'status': {"$ne": 'unfound'}})
+            return(data.data.documents.filter(item => item.status !== 'unfound'))
         } catch (e) {
             console.log(e);
         }
     }
       
       // Update that item has been seen
-      async function updateItem(name, item){
+      async function updateItem(id, name, item){
         try {
             setLoading(true);
-          console.log(`Deleting ${name} & ${item} Combo...`);
-          requestDB.getData(
-           `UPDATE "MaxChamberlain/Vitality"."needed_items" SET status = 'complete' WHERE picker_name = '${item}' AND item = '${name}'`
-          );
-          const today = new Date();
-          const date = today.getMonth() + 1 + '/' + today.getDate() + '/' + today.getFullYear();
-          await requestDB.getData(
-            `UPDATE "MaxChamberlain/Vitality"."needed_items_stats" SET qty=qty + 1 WHERE date='${date}';
-            INSERT INTO "MaxChamberlain/Vitality"."needed_items_stats" (date, qty)
-                   SELECT '${date}', 1
-                   WHERE NOT EXISTS (SELECT date FROM "MaxChamberlain/Vitality"."needed_items_stats" WHERE date='${date}');
-      
-            INSERT INTO "MaxChamberlain/Vitality"."top_restocks"
-            (date, sku)
-            VALUES('${date}','${item}')
-            `
-          );
+          console.log(`Deleting ${id}...`);
+          requestDB.getData('updateOne', 'needed_items', {"_id" : { "$oid" : id}}, {"update" : { "$set" : { "status": "complete" }}})
+          
+          expoPushTokens('Vishi', `${name.trim().slice(0,1) + name.trim().substring(1).toLowerCase()}, your item ${item} has been marked as seen.`, 'stocked', name)
+
           setLoading(false);
         } catch (e) {
           console.log(e);
@@ -226,16 +215,15 @@ export default function MainContainer({navigation}) {
       }
       
       // Remove item from DB
-      async function removeItem(name, item, index) {
+      async function removeItem(id, name, item) {
         try {
-          if(index){
-          }
           setLoading(true);
-          console.log(`Deleting ${name} & ${item} Combo...`);
-          await requestDB.getData(
-           `DELETE FROM "MaxChamberlain/Vitality"."needed_items" WHERE picker_name = '${item}' AND item = '${name}'`
-          );
-          setLoading(false);
+          console.log(`Deleting ${id}...`);
+          requestDB.getData('deleteOne', 'needed_items', {"_id" : { "$oid" : id}})
+
+        expoPushTokens('🎉 Stocked! 🎉', `${name.trim().slice(0,1) + name.trim().substring(1).toLowerCase()}, your item ${item} has been stocked.`, 'stocked', name)
+        
+        setLoading(false);
         } catch (e) {
             console.log(e);
             setFailed(true)
@@ -244,14 +232,14 @@ export default function MainContainer({navigation}) {
       }
       
       // Update that item wasnt found
-      async function unfoundItem(name, item, index){
+      async function unfoundItem(id, name, item){
         try {
         setLoading(1);
-          console.log(`Deleting ${name} & ${item} Combo...`);
-          await requestDB.getData(
-           `UPDATE "MaxChamberlain/Vitality"."needed_items" SET status = 'unfound' WHERE picker_name = '${item}' AND item = '${name}'`
-          );
-          setLoading(false);
+          console.log(`Deleting ${id}...`);
+          requestDB.getData('updateOne', 'needed_items', {"_id" : { "$oid" : id}}, {"update" : { "$set" : { "status": "unfound" }}})
+
+        expoPushTokens('❗ UNFOUND ❗', `${name.trim().slice(0,1) + name.trim().substring(1).toLowerCase()}, your item ${item} was unable to be found.`, 'stocked', name)
+        setLoading(false);
         } catch (e) {
             console.log(e);
             setFailed(true)

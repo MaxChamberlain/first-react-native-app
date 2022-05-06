@@ -1,17 +1,53 @@
 const axios = require("axios");
 
-export async function getData(query) {
-  const res = await axios({
-    url: 'https://stark-oasis-84035.herokuapp.com/' + 'https://api.bit.io/api/v1beta/query/',
-    method: "post",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      'x-requested-with': 'XMLHttpRequest',
-      Authorization: `Bearer 3DBUi_4uRgmbC5FKimFSNrHgfffuS`,
+export async function getData(method, table, filter, criteria) {
+
+  let query = {
+    "collection": table,
+    "database": "vishi",
+    "dataSource": "Cluster0"
+  }
+
+  if(filter !== ''){
+    query = {
+      "collection": table,
+      "database": "vishi",
+      "dataSource": "Cluster0",
+      "filter": filter
+    }
+  }
+
+  if(criteria) {
+    if(criteria.update){
+      query = {
+        "collection": table,
+        "database": "vishi",
+        "dataSource": "Cluster0",
+        "filter": filter,
+        "update": criteria.update
+      }
+    }
+    if(criteria.document) {
+      query = {
+        "collection": table,
+        "database": "vishi",
+        "dataSource": "Cluster0",
+        "document": criteria.document
+      }
+    }
+  }
+  
+  let config = {
+    method: 'post',
+    url: `https://data.mongodb-api.com/app/data-ildvi/endpoint/data/beta/action/${method}`,
+    headers: { 
+      'Content-Type': 'application/json', 
+      'Access-Control-Request-Headers': '*', 
+      'api-key': 'eSadkyvFObiGHVJuAcXtG0jNFrq3oGBaEnAOrkbtUXTLCC8PFXKZn9KFkoYKKzrT'
     },
-    data: JSON.stringify({ query_string: query }),
-  });
-  const data = await res;
-  return JSON.stringify(data) 
+    data : query
+  }
+
+  const res = await axios(config)
+  return await res
 }
